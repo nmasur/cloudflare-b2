@@ -1,0 +1,40 @@
+name: Deploy Cloudflare Worker
+
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: "02 02 */3 * *"
+
+jobs:
+  buildrun:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+      BUCKET_SOURCE_ID: ${{ secrets.BUCKET_SOURCE_ID }}
+      CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
+      B2_APP_KEY: ${{ secrets.B2_APP_KEY }}
+      B2_APP_ID: ${{ secrets.B2_APP_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+
+      - name: Install Poetry
+        uses: dschep/install-poetry-action@v1.3
+
+      - name: Install Dependencies
+        run: |
+          poetry install -n --no-dev
+
+      - name: Run script
+        run: |
+          poetry run ./main.py
